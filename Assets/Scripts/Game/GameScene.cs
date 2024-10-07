@@ -1,7 +1,7 @@
 using Npc;
 using UnityEngine;
 
-namespace DefaultNamespace
+namespace Game
 {
     public class GameScene : MonoBehaviour
     {

@@ -1,7 +1,6 @@
-using System;
 using UnityEngine;
 
-namespace DefaultNamespace
+namespace Game
 {
     public class GameStarter : MonoBehaviour
     {
