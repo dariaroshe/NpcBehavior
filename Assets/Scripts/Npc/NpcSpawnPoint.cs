@@ -21,8 +21,7 @@ namespace Npc
         private void Start()
         {
             var npc = Instantiate(_prefab, transform.position, transform.rotation);
-            npc.Initialize(_gameScene, _wayPoints);
-            npc.SetBehaviors(_npcIdleBehavior, _npcReactionBehavior);
+            npc.Initialize(_gameScene, _wayPoints, _npcIdleBehavior, _npcReactionBehavior);
         }
     }
 }

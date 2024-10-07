@@ -3,7 +3,6 @@ using DefaultNamespace;
 using Movement;
 using Npc.Behaviors;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 namespace Npc
 {
@@ -12,15 +11,10 @@ namespace Npc
         [SerializeField] private NpcMovement _npcMovement;
         
         private NpcState _currentState;
-        private NpcIdleBehavior _npcIdleBehavior;
-        private NpcReactionBehavior _npcReactionBehavior;
+        private IBehavior _npcIdleBehavior;
+        private IBehavior _npcReactionBehavior;
         private GameScene _gameScene;
         private Transform[] _wayPoints;
-        private float _deadZone = 0.1f;
-        private int _pointIndex;
-        private Vector3 _randomDirection;
-        private float _timer;
-        private float _changeDirectionCooldown = 1f;
 
         private void Update()
         {
@@ -28,12 +22,12 @@ namespace Npc
             {
                 case NpcState.Idle:
                 {
-                    Idle();
+                    _npcIdleBehavior.Execute();
                     break;
                 }
                 case NpcState.Reaction:
                 {
-                    Reaction();
+                    _npcReactionBehavior.Execute();
                     break;
                 }
                 default:
@@ -43,10 +37,13 @@ namespace Npc
             }
         }
 
-        public void Initialize(GameScene gameScene, Transform[] wayPoints)
+        public void Initialize(GameScene gameScene, Transform[] wayPoints, NpcIdleBehavior npcIdleBehavior, NpcReactionBehavior npcReactionBehavior)
         {
             _gameScene = gameScene;
             _wayPoints = wayPoints;
+            
+            _npcIdleBehavior = CreateIdleBehavior(npcIdleBehavior);
+            _npcReactionBehavior = CreateReactionBehavior(npcReactionBehavior);
         }
 
         public void SetState(NpcState npcState)
@@ -54,93 +51,28 @@ namespace Npc
             _currentState = npcState;
         }
 
-        public void SetBehaviors(NpcIdleBehavior npcIdleBehavior, NpcReactionBehavior npcReactionBehavior)
+        private IBehavior CreateIdleBehavior(NpcIdleBehavior type)
         {
-            _npcIdleBehavior = npcIdleBehavior;
-            _npcReactionBehavior = npcReactionBehavior;
-        }
-
-        private void Idle()
-        {
-            switch (_npcIdleBehavior)
+            return type switch
             {
-                case NpcIdleBehavior.Stand:
-                {
-                    var direction = Vector3.zero;
-                    _npcMovement.SetDirection(direction);
-                    break;
-                }
-                case NpcIdleBehavior.Patrol:
-                {
-                    if (_pointIndex >= _wayPoints.Length)
-                    {
-                        _pointIndex = 0;
-                    }
-                    
-                    var direction = _wayPoints[_pointIndex].position - transform.position;
-                    _npcMovement.SetDirection(direction);
-
-                    var distance = Vector3.Distance(_wayPoints[_pointIndex].position, transform.position);
-
-                    if (distance < _deadZone)
-                    {
-                        _pointIndex++;
-                    }
-                    
-                    break;
-                }
-                case NpcIdleBehavior.RandomMove:
-                {
-                    if (_timer >= _changeDirectionCooldown)
-                    {
-                        var randomX = Random.Range(-1f, 1f);
-                        var randomZ = Random.Range(-1f, 1f);
-
-                        _randomDirection = new Vector3(randomX, 0, randomZ);
-
-                        _timer = 0f;
-                    }
-                    else
-                    {
-                        _timer += Time.deltaTime;
-                    }
-                    _npcMovement.SetDirection(_randomDirection);
-                    
-                    break;
-                }
-                default:
-                {
-                    throw new ArgumentOutOfRangeException();
-                }
-            }
+                NpcIdleBehavior.Stand => new StandBehavior(_npcMovement),
+                NpcIdleBehavior.Patrol => new PatrolBehavior(_npcMovement, _wayPoints, transform),
+                NpcIdleBehavior.RandomMove => new RandomMoveBehavior(_npcMovement),
+                
+                _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+            };
         }
-
-        private void Reaction()
+        
+        private IBehavior CreateReactionBehavior(NpcReactionBehavior type)
         {
-            switch (_npcReactionBehavior)
+            return type switch
             {
-                case NpcReactionBehavior.RunAway:
-                {
-                    var direction = transform.position - _gameScene.Player.position;
-                    _npcMovement.SetDirection(direction);
-                    break;
-                }
-                case NpcReactionBehavior.Follow:
-                {
-                    var direction =  _gameScene.Player.position - transform.position;
-                    _npcMovement.SetDirection(direction);
-                    break;
-                }
-                case NpcReactionBehavior.Die:
-                {
-                    Destroy(gameObject);
-                    break;
-                }
-                default:
-                {
-                    throw new ArgumentOutOfRangeException();
-                }
-            }
+                NpcReactionBehavior.RunAway => new RunAwayBehavior(_npcMovement, transform, _gameScene),
+                NpcReactionBehavior.Follow => new FollowBehavior(_npcMovement, transform, _gameScene),
+                NpcReactionBehavior.Die => new DieBehavior(gameObject),
+                
+                _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+            };
         }
     }
 }
