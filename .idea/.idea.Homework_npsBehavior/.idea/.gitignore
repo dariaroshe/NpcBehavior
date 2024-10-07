@@ -1,0 +1,13 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+# Rider ignored files
+/projectSettingsUpdater.xml
+/modules.xml
+/.idea.Homework_npsBehavior.iml
+/contentModel.xml
+# Datasource local storage ignored files
+/../../../../../../:\Sources\Homework_npsBehavior\.idea\.idea.Homework_npsBehavior\.idea/dataSources/
+/dataSources.local.xml
+# Editor-based HTTP Client requests
+/httpRequests/
