@@ -19,13 +19,13 @@ namespace Npc.Behaviors
             };
         }
         
-        public static IBehavior CreateReactionBehavior(NpcReactionBehavior type, NpcMovement movement, GameScene gameScene)
+        public static IBehavior CreateReactionBehavior(NpcReactionBehavior type, NpcMovement movement, GameScene gameScene, ParticleSystem dieFxPrefab)
         {
             return type switch
             {
                 NpcReactionBehavior.RunAway => new RunAwayBehavior(movement, movement.transform, gameScene),
                 NpcReactionBehavior.Follow => new FollowBehavior(movement, movement.transform, gameScene),
-                NpcReactionBehavior.Die => new DieBehavior(movement.gameObject),
+                NpcReactionBehavior.Die => new DieBehavior(movement.gameObject, dieFxPrefab),
                 
                 _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
             };

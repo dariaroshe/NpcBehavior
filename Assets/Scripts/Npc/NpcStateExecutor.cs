@@ -9,6 +9,7 @@ namespace Npc
     public class NpcStateExecutor : MonoBehaviour
     {
         [SerializeField] private NpcMovement _npcMovement;
+        [SerializeField] private ParticleSystem _dieFxPrefab;
 
         private readonly Dictionary<NpcState, IBehavior> _stateBehaviors = new();
         
@@ -22,7 +23,7 @@ namespace Npc
         public void Initialize(GameScene gameScene, Transform[] wayPoints, NpcIdleBehavior npcIdleBehavior, NpcReactionBehavior npcReactionBehavior)
         {
             _stateBehaviors.Add(NpcState.Idle, BehaviorFactory.CreateIdleBehavior(npcIdleBehavior, _npcMovement, wayPoints));
-            _stateBehaviors.Add(NpcState.Reaction, BehaviorFactory.CreateReactionBehavior(npcReactionBehavior, _npcMovement, gameScene));
+            _stateBehaviors.Add(NpcState.Reaction, BehaviorFactory.CreateReactionBehavior(npcReactionBehavior, _npcMovement, gameScene, _dieFxPrefab));
         }
 
         public void SetState(NpcState npcState)
